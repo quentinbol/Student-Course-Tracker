@@ -8,6 +8,7 @@ const baseQuery = `
     courses.id AS id,
     courses.name AS name,
     courses.description AS description,
+    courses.code AS code,
     courses.instructor AS instructor,
     COUNT(enrollments.id) AS enrollmentCount
   FROM courses
