@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { Alert, AlertDescription } from './components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { useGetStudentsQuery, type Student } from './api/student';
-import { useGetCoursesQuery, type Course } from './api/courses';
+import { useGetStudentsQuery } from './api/student';
+import { useGetCoursesQuery } from './api/courses';
 import { useEnrollStudentMutation, useGetEnrollmentsQuery, useRecordGradeMutation } from './api/enrollments';
 import { useStatistics } from './hook/useStatistics';
 import { useEnrollmentManager } from './hook/useEnrollmentManager';
 import { useGradeManager } from './hook/useGradeManager';
 import { useSearch } from './hook/useSearch';
-import { DashboardView } from './view/DashboardView';
+import ModernDashboardView from './view/DashboardView';
 import { StudentsView } from './view/StudentView';
 import { CoursesView } from './view/CourseView';
 import { ManageView } from './view/ManagingView';
-import { Navigation } from './components/basic/Navigation';
-import { Header } from './components/basic/Header';
+import LayoutWithSidebar from './app/navigation/Sidebar';
 
 export default function StudentCourseTracker() {
 
@@ -50,67 +49,78 @@ export default function StudentCourseTracker() {
     setSuccess
   );
 
-  const filteredStudents = useSearch<Student>(students, searchTerm, ['first_name', 'email']);
-  const filteredCourses = useSearch<Course>(courses, searchTerm, ['name', 'code']);
+  const filteredStudents = useSearch(students, searchTerm, ['first_name', 'email']);
+  const filteredCourses = useSearch(courses, searchTerm, ['name', 'code']);
 
   const isLoading = studentsLoading || coursesLoading || enrollmentsLoading;
   const error = studentsError || coursesError;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-emerald-600" />
+          <p className="text-gray-600 font-medium">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 w-[100vw]">
-      <Header />
-      <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
+    <LayoutWithSidebar activeTab={activeTab} setActiveTab={setActiveTab}>
+      {error && (
+        <Alert className="mb-4 bg-red-50 border-red-200">
+          <AlertDescription className="text-red-800">
+            Error loading data. Please try again later.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {success && (
+        <Alert className="mb-4 bg-green-50 border-green-200">
+          <AlertDescription className="text-green-800">{success}</AlertDescription>
+        </Alert>
+      )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {error && (
-          <Alert className="mb-4 bg-red-50 border-red-200">
-            <AlertDescription className="text-red-800">
-              Error loading data. Please try again later.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {success && (
-          <Alert className="mb-4 bg-green-50 border-green-200">
-            <AlertDescription className="text-green-800">{success}</AlertDescription>
-          </Alert>
-        )}
+      {activeTab === 'dashboard' && (
+        <ModernDashboardView 
+          stats={stats} 
+          students={students} 
+          courses={courses}
+          enrollments={enrollments}
+        />
+      )}
 
-        {activeTab === 'dashboard' && (
-          <DashboardView stats={stats} students={students} courses={courses} />
-        )}
+      {activeTab === 'students' && (
+        <StudentsView 
+          students={filteredStudents} 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm} 
+        />
+      )}
 
-        {activeTab === 'students' && (
-          <StudentsView students={filteredStudents} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        )}
+      {activeTab === 'courses' && (
+        <CoursesView 
+          courses={filteredCourses} 
+          searchTerm={searchTerm} 
+          setSearchTerm={setSearchTerm} 
+        />
+      )}
 
-        {activeTab === 'courses' && (
-          <CoursesView courses={filteredCourses} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        )}
-
-        {activeTab === 'manage' && (
-          <ManageView 
-            students={students}
-            courses={courses}
-            enrollForm={enrollForm}
-            setEnrollForm={setEnrollForm}
-            gradeForm={gradeForm}
-            setGradeForm={setGradeForm}
-            onEnroll={handleEnroll}
-            onGrade={handleGrade}
-            enrolling={enrolling}
-            recording={recording}
-          />
-        )}
-      </main>
-    </div>
+      {activeTab === 'manage' && (
+        <ManageView 
+          students={students}
+          courses={courses}
+          enrollForm={enrollForm}
+          setEnrollForm={setEnrollForm}
+          gradeForm={gradeForm}
+          setGradeForm={setGradeForm}
+          onEnroll={handleEnroll}
+          onGrade={handleGrade}
+          enrolling={enrolling}
+          recording={recording}
+        />
+      )}
+    </LayoutWithSidebar>
   );
 }
