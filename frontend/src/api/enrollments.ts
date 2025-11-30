@@ -8,6 +8,14 @@ export type Enrollment = {
   created_at?: string;
 };
 
+export interface CourseStudent {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  grade?: string | null;
+}
+
 export const extendedStudentApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
 
@@ -43,6 +51,10 @@ export const extendedStudentApi = apiSlice.injectEndpoints({
           ],
         }),
 
+        getCourseStudents: builder.query<CourseStudent[], number>({
+          query: (courseId) => `/enrollments/courses/${courseId}/students`,
+          providesTags: (_result, _error, courseId) => [{ type: 'CourseGrades', id: courseId }],
+        }),
     }),
 });
 
@@ -50,4 +62,5 @@ export const {
   useGetEnrollmentsQuery,
   useEnrollStudentMutation,
   useRecordGradeMutation,
+  useGetCourseStudentsQuery,
 } = extendedStudentApi;
