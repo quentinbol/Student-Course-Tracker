@@ -15,7 +15,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placehold
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="pl-10"
+      className="pl-10 bg-white"
     />
   </div>
 );
