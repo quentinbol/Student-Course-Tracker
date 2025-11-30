@@ -1,5 +1,15 @@
 import { apiSlice } from "./apiSlice";
 
+export type StudentEnrollment = {
+  id: number;
+  grade: string;
+  course: {
+    id: number;
+    name: string;
+    code: string;
+  };
+};
+
 export type Student = {
   id: number;
   first_name?: string;
@@ -7,15 +17,7 @@ export type Student = {
   email?: string;
   created_at?: string;
   enrollmentCount?: number;
-  Enrollments?: {
-    id: number;
-    grade: string;
-    course: {
-      id: number;
-      name: string;
-      code: string;
-    };
-  }
+  enrollments?: StudentEnrollment[];
 };
 
 export const extendedStudentApi = apiSlice.injectEndpoints({
