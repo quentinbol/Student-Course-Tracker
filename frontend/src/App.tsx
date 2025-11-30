@@ -93,7 +93,8 @@ export default function StudentCourseTracker() {
 
       {activeTab === 'students' && (
         <StudentsView 
-          students={filteredStudents} 
+          students={filteredStudents}
+          courses={courses}
           searchTerm={searchTerm} 
           setSearchTerm={setSearchTerm} 
         />
