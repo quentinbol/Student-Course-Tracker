@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { Loader2, AlertCircle, Check } from "lucide-react";
 import type { Course } from "../../api/courses";
 import type { Student } from "../../api/student";
-import type { Enrollment } from "../../api/enrollments";
 import type { GradeForm as GradeFormType } from "../../hook/useGradeManager";
 import { useMemo } from "react";
 import useGradeColor from "../../hook/useGradeColor";
@@ -12,7 +11,6 @@ import useGradeColor from "../../hook/useGradeColor";
 interface GradeFormProps {
   students: Student[];
   courses: Course[];
-  enrollments: Enrollment[];
   gradeForm: GradeFormType;
   setGradeForm: (form: GradeFormType) => void;
   onSubmit: () => void;
@@ -22,7 +20,6 @@ interface GradeFormProps {
 export const GradeForm: React.FC<GradeFormProps> = ({ 
   students, 
   courses,
-  enrollments,
   gradeForm, 
   setGradeForm, 
   onSubmit, 
@@ -38,25 +35,26 @@ export const GradeForm: React.FC<GradeFormProps> = ({
     const studentId = parseInt(gradeForm.studentId);
     const selectedStudent = students.find(s => s.id === studentId);
     
-    if (selectedStudent?.enrollments) {
-      return selectedStudent.enrollments.map(e => e.course);
-    }
-  
-    const studentEnrollments = enrollments.filter(e => e.student_id === studentId);
-    return courses.filter(course => 
-      studentEnrollments.some(e => e.course_id === course.id)
-    );
-  }, [gradeForm.studentId, students, enrollments, courses]);
+    if (!selectedStudent?.enrollments) return [];
+
+    return selectedStudent.enrollments.map(enrollment => ({
+      ...enrollment.course,
+      currentGrade: enrollment.grade
+    }));
+  }, [gradeForm.studentId, students]);
 
   const handleStudentChange = (value: string) => {
     setGradeForm({
       ...gradeForm,
       studentId: value,
       courseId: '',
+      grade: '',
     });
   };
 
+  const selectedCourse = enrolledCourses.find(c => c.id.toString() === gradeForm.courseId);
   const isFormValid = gradeForm.studentId && gradeForm.courseId && gradeForm.grade;
+  const selectedStudent = students.find(s => s.id.toString() === gradeForm.studentId);
 
   return (
     <div className="space-y-4">
@@ -98,6 +96,7 @@ export const GradeForm: React.FC<GradeFormProps> = ({
           </p>
         )}
       </div>
+
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700">
           Course
@@ -117,17 +116,24 @@ export const GradeForm: React.FC<GradeFormProps> = ({
             } />
           </SelectTrigger>
           <SelectContent>
-            {courses.map(c => (
+            {enrolledCourses.map(c => (
               <SelectItem 
                 key={c.id} 
                 value={c.id.toString()}
                 className="cursor-pointer"
               >
-                <div className="flex items-center gap-3">
-                  <div className="px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-semibold">
-                    {c.code}
+                <div className="flex items-center gap-3 justify-between w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-semibold">
+                      {c.code}
+                    </div>
+                    <span className="font-medium">{c.name}</span>
                   </div>
-                  <span className="font-medium">{c.name}</span>
+                  {c.currentGrade && (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getGradeColor(c.currentGrade)}`}>
+                      {c.currentGrade}
+                    </span>
+                  )}
                 </div>
               </SelectItem>
             ))}
@@ -137,6 +143,11 @@ export const GradeForm: React.FC<GradeFormProps> = ({
           <p className="text-xs text-gray-500 flex items-center gap-1">
             <Check className="h-3 w-3 text-green-600" />
             Course selected
+            {selectedCourse?.currentGrade && (
+              <span className="ml-1">
+                (current grade: <span className="font-semibold">{selectedCourse.currentGrade}</span>)
+              </span>
+            )}
           </p>
         )}
         {gradeForm.studentId && enrolledCourses.length === 0 && (
@@ -145,17 +156,18 @@ export const GradeForm: React.FC<GradeFormProps> = ({
             <div className="text-sm text-amber-800">
               <p className="font-medium">No courses found</p>
               <p className="text-amber-700 mt-1">
-                This student is not enrolled in any courses yet. Please enroll them first.
+                {selectedStudent?.first_name} is not enrolled in any courses yet. Please enroll them first.
               </p>
             </div>
           </div>
         )}
         {gradeForm.studentId && enrolledCourses.length > 0 && (
           <p className="text-xs text-gray-500">
-            Student is enrolled in {enrolledCourses.length} course{enrolledCourses.length !== 1 ? 's' : ''}
+            {selectedStudent?.first_name} is enrolled in {enrolledCourses.length} course{enrolledCourses.length !== 1 ? 's' : ''}
           </p>
         )}
       </div>
+
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700">
           Grade
@@ -185,26 +197,45 @@ export const GradeForm: React.FC<GradeFormProps> = ({
           </p>
         )}
       </div>
+
       <Button 
         onClick={onSubmit}
-        disabled={isLoading || !gradeForm.studentId || !gradeForm.courseId || !gradeForm.grade}
-        className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+        disabled={isLoading || !isFormValid}
+        className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
       >
-        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Assign Grade'}
+        {isLoading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Recording...
+          </>
+        ) : (
+          <>
+            <Check className="h-4 w-4 mr-2" />
+            {selectedCourse?.currentGrade ? 'Update Grade' : 'Assign Grade'}
+          </>
+        )}
       </Button>
 
       {isFormValid && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            Ready to grade{' '}
+            Ready to {selectedCourse?.currentGrade ? 'update' : 'assign'} grade for{' '}
             <span className="font-semibold">
               {students.find(s => s.id.toString() === gradeForm.studentId)?.first_name}
             </span>
-            {' '}in course{' '}
+            {' '}in{' '}
             <span className="font-semibold">
               {courses.find(c => c.id.toString() === gradeForm.courseId)?.code}
             </span>
-            {' '}with grade{' '}
+            {selectedCourse?.currentGrade && (
+              <span>
+                {' '}from{' '}
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getGradeColor(selectedCourse.currentGrade)} inline-block`}>
+                  {selectedCourse.currentGrade}
+                </span>
+              </span>
+            )}
+            {' '}to{' '}
             <span className={`px-2 py-1 rounded-full text-sm font-semibold ${getGradeColor(gradeForm.grade || '')} inline-block`}>
               {gradeForm.grade}
             </span>
