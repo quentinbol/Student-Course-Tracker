@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { Course } from "../api/courses";
 import type { Student } from "../api/student";
-import type { Enrollment } from "../api/enrollments";
 import { EnrollForm } from "../components/form/EnrollForm";
 import { GradeForm } from "../components/form/GradeForm";
 import type { EnrollForm as EnrollFormType } from "../hook/useEnrollmentManager";
@@ -12,7 +11,6 @@ import { UserPlus, Award } from "lucide-react";
 interface ManageViewProps {
   students: Student[];
   courses: Course[];
-  enrollments: Enrollment[];
   enrollForm: EnrollFormType;
   setEnrollForm: (form: EnrollFormType) => void;
   gradeForm: GradeFormType;
@@ -28,7 +26,6 @@ type TabType = 'enroll' | 'grade';
 export const ManageView: React.FC<ManageViewProps> = ({ 
   students, 
   courses,
-  enrollments,
   enrollForm, 
   setEnrollForm, 
   gradeForm, 
@@ -114,7 +111,6 @@ export const ManageView: React.FC<ManageViewProps> = ({
               <GradeForm
                 students={students}
                 courses={courses}
-                enrollments={enrollments}
                 gradeForm={gradeForm}
                 setGradeForm={setGradeForm}
                 onSubmit={onGrade}
