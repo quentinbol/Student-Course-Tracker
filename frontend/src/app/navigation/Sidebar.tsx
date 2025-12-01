@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   GraduationCap, 
   LayoutDashboard, 
@@ -8,21 +9,28 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'students', label: 'Students', icon: Users },
-    { id: 'courses', label: 'Courses', icon: BookOpen },
-    { id: 'manage', label: 'Manage', icon: Award }
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'students', label: 'Students', icon: Users, path: '/students' },
+    { id: 'courses', label: 'Courses', icon: BookOpen, path: '/courses' },
+    { id: 'manage', label: 'Manage', icon: Award, path: '/manage' }
   ];
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -50,25 +58,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setI
               <p className="text-xs text-gray-400">SOEN 387</p>
             </div>
           </div>
-          <button 
+          <Button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden text-gray-400 hover:text-white"
+            className="lg:hidden text-gray-400 hover:text-white bg-transparent hover:bg-green-800 rounded-md"
           >
-            <X className="h-6 w-6" />
-          </button>
+            <X className="h-2 w-2" />
+          </Button>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           {menuItems.map(item => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = location.pathname === item.path;
             
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleNavigation(item.path)}
                 className={`
                   w-full flex items-center space-x-3 px-4 py-3 rounded-lg
                   transition-all duration-200 group
@@ -101,19 +106,46 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, setI
 };
 
 interface LayoutWithSidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
   children: React.ReactNode;
 }
 
-export default function LayoutWithSidebar({ activeTab, setActiveTab, children }: LayoutWithSidebarProps) {
+export default function LayoutWithSidebar({ children }: LayoutWithSidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const getPageTitle = () => {
+    switch(location.pathname) {
+      case '/dashboard':
+        return 'Dashboard';
+      case '/students':
+        return 'Students';
+      case '/courses':
+        return 'Courses';
+      case '/manage':
+        return 'Manage';
+      default:
+        return 'Dashboard';
+    }
+  };
+
+  const getPageSubtitle = () => {
+    switch(location.pathname) {
+      case '/dashboard':
+        return 'Plan, prioritize, and accomplish your tasks with ease';
+      case '/students':
+        return 'Manage and track all student information';
+      case '/courses':
+        return 'View and manage course offerings';
+      case '/manage':
+        return 'Enroll students and assign grades';
+      default:
+        return 'Plan, prioritize, and accomplish your tasks with ease';
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
       <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
       />
@@ -140,13 +172,10 @@ export default function LayoutWithSidebar({ activeTab, setActiveTab, children }:
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 capitalize">
-                  {activeTab}
+                  {getPageTitle()}
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {activeTab === 'dashboard' && 'Plan, prioritize, and accomplish your tasks with ease'}
-                  {activeTab === 'students' && 'Manage and track all student information'}
-                  {activeTab === 'courses' && 'View and manage course offerings'}
-                  {activeTab === 'manage' && 'Enroll students and assign grades'}
+                  {getPageSubtitle()}
                 </p>
               </div>
               <div className="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-full text-sm font-medium">
