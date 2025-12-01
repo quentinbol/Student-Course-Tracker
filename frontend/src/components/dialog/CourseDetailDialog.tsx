@@ -7,6 +7,7 @@ import { useGetCourseStudentsQuery, type Enrollment } from '../../api/enrollment
 import { useStatistics } from '../../hook/useStatistics';
 import type { Student } from '../../api/student';
 import useGradeColor from '../../hook/useGradeColor';
+import { StatCard } from '../basic/StatCard';
 
 interface CourseDetailDialogProps {
   course: Course | null;
@@ -40,7 +41,7 @@ export const CourseDetailDialog: React.FC<CourseDetailDialogProps> = ({ course, 
         />
       )}
       <div className={`
-        fixed top-0 right-0 h-full w-full md:w-[700px] bg-white shadow-2xl z-50
+        fixed top-0 right-0 h-full w-full md:w-[700px] bg-gray-50 shadow-2xl z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
       `}>
@@ -68,41 +69,28 @@ export const CourseDetailDialog: React.FC<CourseDetailDialogProps> = ({ course, 
         <div className="h-[calc(100%-112px)] overflow-y-auto p-6">
           <div className="space-y-6">
             <div className="grid grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">Enrolled Students</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold">{course.enrollmentCount || 0}</span>
-                    <Users className="h-8 w-8 text-blue-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">Average GPA</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold">{averageGPA ? averageGPA.toFixed(2) : '-'}</span>
-                    <Award className="h-8 w-8 text-green-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                title="Total Students"
+                value={course.enrollmentCount || 0}
+                icon={Users}
+                gradient="bg-green-800"
+                textColor='text-white'
+              />
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">Course Code</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{course.code}</span>
-                    <BookOpen className="h-8 w-8 text-purple-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                title="Average GPA"
+                value={averageGPA ? averageGPA.toFixed(2) : '-'}
+                icon={Award}
+                gradient="bg-white"
+              />
+
+              <StatCard
+                title="Course Code"
+                value={course.code?.toString() || '-'}
+                icon={BookOpen}
+                gradient="bg-white"
+              />
             </div>
 
             {course.description && (
