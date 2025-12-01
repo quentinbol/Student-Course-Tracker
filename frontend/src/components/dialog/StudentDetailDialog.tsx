@@ -7,6 +7,7 @@ import type { Enrollment } from '../../api/enrollments';
 import type { Course } from '../../api/courses';
 import { useStatistics } from '../../hook/useStatistics';
 import useGradeColor from '../../hook/useGradeColor';
+import { StatCard } from '../basic/StatCard';
 
 interface StudentDetailDialogProps {
   student: Student | null;
@@ -38,7 +39,7 @@ export const StudentDetailDialog: React.FC<StudentDetailDialogProps> = ({ studen
         />
       )}
       <div className={`
-        fixed top-0 right-0 h-full w-full md:w-[600px] bg-white shadow-2xl z-50
+        fixed top-0 right-0 h-full w-full md:w-[600px] bg-gray-50 shadow-2xl z-50
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : 'translate-x-full'}
       `}>
@@ -70,41 +71,27 @@ export const StudentDetailDialog: React.FC<StudentDetailDialogProps> = ({ studen
         <div className="h-[calc(100%-112px)] overflow-y-auto p-6">
           <div className="space-y-6">
             <div className="grid grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">Total Courses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold">{student.enrollmentCount || 0}</span>
-                    <BookOpen className="h-8 w-8 text-blue-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                title="Total Courses"
+                value={student.enrollmentCount?.toLocaleString() || '0'}
+                icon={BookOpen}
+                gradient="bg-green-800"
+                textColor='text-white'
+              />
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">GPA</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-3xl font-bold">{averageGPA || 0}</span>
-                    <Award className="h-8 w-8 text-green-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                title="GPA"
+                value={averageGPA?.toFixed(2) || '0.00'}
+                icon={Award}
+                gradient="bg-white"
+              />
 
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardDescription className="text-sm font-medium">Status</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold text-green-600">Active</span>
-                    <GraduationCap className="h-8 w-8 text-purple-500 opacity-50" />
-                  </div>
-                </CardContent>
-              </Card>
+              <StatCard
+                title="Status"
+                value="Active"
+                icon={GraduationCap}
+                gradient="bg-white"
+              />
             </div>
             <Card>
               <CardHeader>
