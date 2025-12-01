@@ -2,25 +2,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Users, BookOpen, TrendingUp, Award } from 'lucide-react';
 import type { Stats } from '../hook/useStatistics';
 import { EnrollmentTrends } from '../components/graph/Enrollments';
-import { ModernStatCard } from '../components/basic/StatCard';
+import { StatCard } from '../components/basic/StatCard';
 import { ProjectAnalytics } from '../components/graph/ProjectAnalytics';
 import { GradeDistribution } from '../components/graph/GradeDistribution';
 import type { Student } from '../api/student';
 import type { Course } from '../api/courses';
-import type { Enrollment } from '../api/enrollments';
 
 interface DashboardViewProps {
   stats: Stats;
   students: Student[];
   courses: Course[];
-  enrollments: Enrollment[];
 }
 
-export default function ModernDashboardView({ stats, students, courses }: DashboardViewProps & { stats: Stats }) {
+const ModernDashboardView: React.FC<DashboardViewProps> = ({ stats, students, courses }) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <ModernStatCard
+        <StatCard
           title="Total Students"
           value={stats.totalStudents}
           change="Increased from last month"
@@ -28,21 +26,21 @@ export default function ModernDashboardView({ stats, students, courses }: Dashbo
           gradient="bg-green-800"
           textColor='text-white'
         />
-        <ModernStatCard
+        <StatCard
           title="Active Courses"
           value={stats.totalCourses}
           change="New courses added"
           icon={BookOpen}
           gradient="bg-white"
         />
-        <ModernStatCard
+        <StatCard
           title="Enrollments"
           value={stats.totalEnrollments}
           change="Increased from last month"
           icon={TrendingUp}
           gradient="bg-white"
         />
-        <ModernStatCard
+        <StatCard
           title="Average GPA"
           value={stats.averageGPA.toFixed(2)}
           change="On Discussion"
@@ -152,3 +150,5 @@ export default function ModernDashboardView({ stats, students, courses }: Dashbo
     </div>
   );
 }
+
+export default ModernDashboardView;
