@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { StudentDetailDialog } from "../components/dialog/StudentDetailDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Filter, X } from "lucide-react";
+import { Button } from "../components/ui/button";
 
 interface StudentsViewProps {
   students: Student[];
@@ -67,20 +68,20 @@ export const StudentsView: React.FC<StudentsViewProps> = ({ students, courses, s
                   <SelectItem value="all">All Courses</SelectItem>
                   {courses.map(course => (
                     <SelectItem key={course.id} value={course.id.toString()}>
-                      {course.code} - {course.name}
+                      {course.code} - {course.name.length > 20 ? course.name.slice(0, 20) + "..." : course.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             {hasActiveFilters && (
-              <button
+              <Button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center gap-2 transition-colors"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <X className="h-4 w-4" />
                 <span className="hidden sm:inline">Clear</span>
-              </button>
+              </Button>
             )}
           </div>
         </div>
