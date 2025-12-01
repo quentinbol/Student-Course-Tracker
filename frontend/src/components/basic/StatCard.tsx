@@ -12,7 +12,7 @@ export const ModernStatCard = ({
 }: { 
   title: string; 
   value: string | number; 
-  change: string; 
+  change?: string; 
   icon: React.ElementType; 
   gradient: string;
   textColor?: string;
@@ -30,10 +30,12 @@ export const ModernStatCard = ({
     <CardContent className="relative z-10">
       <div className="space-y-1 z-10">
         <div className={`text-3xl font-bold ${textColor || 'text-gray-900'}`}>{value}</div>
-        <div className="flex items-center text-sm">
-          <ArrowUpRight className="h-4 w-4 text-green-300 mr-1" />
-          <span className="text-green-300 font-medium">{change}</span>
-        </div>
+        {change && (
+          <div className="flex items-center text-sm">
+            <ArrowUpRight className="h-4 w-4 text-green-300 mr-1" />
+            <span className="text-green-300 font-medium">{change}</span>
+          </div>
+        )}
       </div>
     </CardContent>
   </Card>
