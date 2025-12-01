@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardContent, CardDescription } from '../ui/card';
 import { ArrowUpRight } from 'lucide-react';
 
-export const ModernStatCard = ({ 
+export const StatCard = ({ 
   title, 
   value, 
   change, 
