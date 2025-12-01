@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, AlertCircle } from "lucide-react";
 import type { Course } from "../../api/courses";
 import type { Student } from "../../api/student";
 import type { EnrollForm as EnrollFormType} from "../../hook/useEnrollmentManager";
@@ -24,7 +24,30 @@ export const EnrollForm: React.FC<EnrollFormProps> = ({
   onSubmit, 
   isLoading 
 }) => {
+
+  const availableCourses = useMemo(() => {
+    if (!enrollForm.studentId) return courses;
+    
+    const studentId = parseInt(enrollForm.studentId);
+    const selectedStudent = students.find(s => s.id === studentId);
+    
+    if (!selectedStudent?.enrollments) return courses;
+
+    const enrolledCourseIds = selectedStudent.enrollments.map(e => e.course.id);
+
+    return courses.filter(course => !enrolledCourseIds.includes(course.id));
+  }, [enrollForm.studentId, students, courses]);
+
+  const handleStudentChange = (value: string) => {
+    setEnrollForm({
+      ...enrollForm,
+      studentId: value,
+      courseId: '',
+    });
+  };
+
   const isFormValid = enrollForm.studentId && enrollForm.courseId;
+  const selectedStudent = students.find(s => s.id.toString() === enrollForm.studentId);
 
   return (
     <div className="space-y-6">
@@ -34,7 +57,7 @@ export const EnrollForm: React.FC<EnrollFormProps> = ({
         </Label>
         <Select 
           value={enrollForm.studentId} 
-          onValueChange={(value) => setEnrollForm({...enrollForm, studentId: value})}
+          onValueChange={handleStudentChange}
         >
           <SelectTrigger className="h-14 bg-white border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
             <SelectValue placeholder="Select a student" />
@@ -66,6 +89,7 @@ export const EnrollForm: React.FC<EnrollFormProps> = ({
           </p>
         )}
       </div>
+
       <div className="space-y-2">
         <Label className="text-sm font-medium text-gray-700">
           Course
@@ -73,12 +97,19 @@ export const EnrollForm: React.FC<EnrollFormProps> = ({
         <Select 
           value={enrollForm.courseId} 
           onValueChange={(value) => setEnrollForm({...enrollForm, courseId: value})}
+          disabled={!enrollForm.studentId || availableCourses.length === 0}
         >
           <SelectTrigger className="h-14 bg-white border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
-            <SelectValue placeholder="Select a course" />
+            <SelectValue placeholder={
+              !enrollForm.studentId 
+                ? "Select a student first" 
+                : availableCourses.length === 0 
+                ? "No available courses" 
+                : "Select a course"
+            } />
           </SelectTrigger>
           <SelectContent>
-            {courses.map(c => (
+            {availableCourses.map(c => (
               <SelectItem 
                 key={c.id} 
                 value={c.id.toString()}
@@ -98,6 +129,22 @@ export const EnrollForm: React.FC<EnrollFormProps> = ({
           <p className="text-xs text-gray-500 flex items-center gap-1">
             <Check className="h-3 w-3 text-green-600" />
             Course selected
+          </p>
+        )}
+        {enrollForm.studentId && availableCourses.length === 0 && (
+          <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-amber-800">
+              <p className="font-medium">All courses enrolled</p>
+              <p className="text-amber-700 mt-1">
+                {selectedStudent?.first_name} is already enrolled in all available courses ({selectedStudent?.enrollmentCount || 0}/{courses.length}).
+              </p>
+            </div>
+          </div>
+        )}
+        {enrollForm.studentId && availableCourses.length > 0 && (
+          <p className="text-xs text-gray-500">
+            {availableCourses.length} course{availableCourses.length !== 1 ? 's' : ''} available (already enrolled in {(selectedStudent?.enrollmentCount || 0)})
           </p>
         )}
       </div>
