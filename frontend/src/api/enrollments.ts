@@ -35,6 +35,10 @@ export const extendedStudentApi = apiSlice.injectEndpoints({
             { type: 'Enrollments', id: 'LIST' },
             { type: 'StudentCourses', id: arg?.student_id ?? 'UNKNOWN' },
             { type: 'CourseGrades', id: arg?.course_id ?? 'UNKNOWN' },
+            { type: 'Students', id: arg?.student_id ?? 'UNKNOWN' },
+            { type: 'Students', id: 'LIST' },
+            { type: 'Courses', id: arg?.course_id ?? 'UNKNOWN' },
+            { type: 'Courses', id: 'LIST' },
           ],
         }),
 
@@ -48,6 +52,10 @@ export const extendedStudentApi = apiSlice.injectEndpoints({
             { type: 'StudentCourses', id: arg.student_id },
             { type: 'CourseGrades', id: arg.course_id },
             { type: 'Enrollments', id: 'LIST' },
+            { type: 'Students', id: arg.student_id },
+            { type: 'Students', id: 'LIST' },
+            { type: 'Courses', id: arg.course_id },
+            { type: 'Courses', id: 'LIST' },
           ],
         }),
 
