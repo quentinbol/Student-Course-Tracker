@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { Alert, AlertDescription } from './components/ui/alert';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { useGetStudentsQuery } from './api/student';
-import { useGetCoursesQuery } from './api/courses';
-import { useEnrollStudentMutation, useGetEnrollmentsQuery, useRecordGradeMutation } from './api/enrollments';
-import { useStatistics } from './hook/useStatistics';
-import { useEnrollmentManager } from './hook/useEnrollmentManager';
-import { useGradeManager } from './hook/useGradeManager';
-import { useSearch } from './hook/useSearch';
-import ModernDashboardView from './view/DashboardView';
-import { StudentsView } from './view/StudentView';
-import { CoursesView } from './view/CourseView';
-import { ManageView } from './view/ManagingView';
-import LayoutWithSidebar from './app/navigation/Sidebar';
+import { Route } from 'react-router-dom';
+import { useGetStudentsQuery } from '../api/student';
+import { useGetCoursesQuery } from '../api/courses';
+import { useEnrollStudentMutation, useGetEnrollmentsQuery, useRecordGradeMutation } from '../api/enrollments';
+import { useStatistics } from '../hook/useStatistics';
+import { useEnrollmentManager } from '../hook/useEnrollmentManager';
+import { useGradeManager } from '../hook/useGradeManager';
+import { useSearch } from '../hook/useSearch';
+import ModernDashboardView from '../view/DashboardView';
+import { StudentsView } from '../view/StudentView';
+import { CoursesView } from '../view/CourseView';
+import { ManageView } from '../view/ManagingView';
+import LayoutWithSidebar from './navigation/Sidebar';
+import { BrowserRouter, Navigate, Routes } from 'react-router-dom';
 
-export default function StudentCourseTracker() {
-
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+const AppContent = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
@@ -67,7 +67,7 @@ export default function StudentCourseTracker() {
   }
 
   return (
-    <LayoutWithSidebar activeTab={activeTab} setActiveTab={setActiveTab}>
+    <LayoutWithSidebar>
       {error && (
         <Alert className="mb-4 bg-red-50 border-red-200">
           <AlertDescription className="text-red-800">
@@ -82,46 +82,67 @@ export default function StudentCourseTracker() {
         </Alert>
       )}
 
-      {activeTab === 'dashboard' && (
-        <ModernDashboardView 
-          stats={stats} 
-          students={students} 
-          courses={courses}
-          enrollments={enrollments}
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ModernDashboardView 
+              stats={stats} 
+              students={students} 
+              courses={courses}
+            />
+          } 
         />
-      )}
-
-      {activeTab === 'students' && (
-        <StudentsView 
-          students={filteredStudents}
-          courses={courses}
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
+        <Route 
+          path="/students" 
+          element={
+            <StudentsView 
+              students={filteredStudents}
+              courses={courses}
+              searchTerm={searchTerm} 
+              setSearchTerm={setSearchTerm} 
+            />
+          } 
         />
-      )}
-
-      {activeTab === 'courses' && (
-        <CoursesView 
-          courses={filteredCourses} 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
+        <Route 
+          path="/courses" 
+          element={
+            <CoursesView 
+              courses={filteredCourses} 
+              searchTerm={searchTerm} 
+              setSearchTerm={setSearchTerm} 
+            />
+          } 
         />
-      )}
-
-      {activeTab === 'manage' && (
-        <ManageView 
-          students={students}
-          courses={courses}
-          enrollForm={enrollForm}
-          setEnrollForm={setEnrollForm}
-          gradeForm={gradeForm}
-          setGradeForm={setGradeForm}
-          onEnroll={handleEnroll}
-          onGrade={handleGrade}
-          enrolling={enrolling}
-          recording={recording}
+        <Route 
+          path="/manage" 
+          element={
+            <ManageView 
+              students={students}
+              courses={courses}
+              enrollForm={enrollForm}
+              setEnrollForm={setEnrollForm}
+              gradeForm={gradeForm}
+              setGradeForm={setGradeForm}
+              onEnroll={handleEnroll}
+              onGrade={handleGrade}
+              enrolling={enrolling}
+              recording={recording}
+            />
+          } 
         />
-      )}
+      </Routes>
     </LayoutWithSidebar>
   );
 }
+
+const StudentCourseTracker = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+};
+
+export default StudentCourseTracker;
